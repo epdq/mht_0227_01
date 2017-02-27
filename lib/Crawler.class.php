@@ -27,15 +27,14 @@
 		{
 			if(is_array($url_list)){
 				foreach($url_list as $url_item){
-					if(preg_match("/^(http:\/\/|https:\/\/|javascript:)/",$url_item)){
-					$result_url_list[]=$url_item;
+					if(preg_match("/^(http:\/\/|https:\/\/|javascript:)/", $url_item)){
+					$result_url_list[] = $url_item;
 				}else {
 					if(preg_match("/^\//",$url_item)){
-						$real_url = $base_url.$url_item;
+						$real_url = $base_url . $url_item;
 					}else{
-						$real_url = $base_url."/".$url_item;
+						$real_url = $base_url . "/" . $url_item;
 					}
-					#$real_url = 'http://www.sumpay.cn/'.$url_item; 
 					$result_url_list[] = $real_url; 
 				}
 			}
