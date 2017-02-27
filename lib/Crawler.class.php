@@ -1,5 +1,6 @@
 <?php
 	class Crawler{
+		
 		public function init($url)
 		{
 			# code...
@@ -43,4 +44,6 @@
 				return;
 			}
 		}
+
+
 	}
