@@ -25,31 +25,22 @@
 
 		public function reviseUrl($base_url, $url)
 		{
-			$url_info = parse_url($base_url);
-			$base_url = $url_info["scheme"].'://';
-			if($url_info["user"] && $url_info["pass"]){
-				$base_url .= $url_info["user"].":".$url_info["pass"]."@";
-			}
-			$base_url .= $url_info["host"];
-			if($url_info["port"]){
-				$base_url .= ":".$url_info["port"];
-			}
-
-			$base_url .= $url_info["path"];
-			print_r($base_url);
 			if(is_array($url_list)){
-				foreach ($url_list as $url_item) {
-					if(preg_match('/^http/',$url_item)){
-						//已经是完整的url
-						$result[] = $url_item;
-					}else {
-						//不完整的url
-						$real_url = $base_url.'/'.$url_item;
-						$result[] = $real_url;
+				foreach($url_list as $url_item){
+					if(preg_match("/^(http:\/\/|https:\/\/|javascript:)/",$url_item)){
+					$result_url_list[]=$url_item;
+				}else {
+					if(preg_match("/^\//",$url_item)){
+						$real_url = $base_url.$url_item;
+					}else{
+						$real_url = $base_url."/".$url_item;
 					}
+					#$real_url = 'http://www.sumpay.cn/'.$url_item; 
+					$result_url_list[] = $real_url; 
 				}
-				return $result;
-			}else {
+			}
+				return $result_url_list;
+			}else{
 				return;
 			}
 		}
