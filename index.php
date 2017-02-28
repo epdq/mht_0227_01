@@ -102,6 +102,13 @@
 				$imgNmae = date('Ymdhis') . rand(1000, 9999) . '.jpg';	// 保存到本地图片名称
 				copy($imgSrc, 'images/' . $imgNmae);
 				$room['Pic'] = $imgNmae;	// 本地图片地址
+
+				// 公寓设施
+				$facility = $dom->find('.mt10 .col-xs-3');
+				foreach ($facility as $key => $value) {
+					$room['facility'][] = trim($value->plaintext);
+				}
+				
 				$roomInfo[] = $room;
 			}
 
