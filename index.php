@@ -1,12 +1,14 @@
 <?php
 
 
-	//require_once "lib/Crawler.class.php";
+
 	require_once "lib/simple_html_dom.php";
+
+	date_default_timezone_set('Asia/Shanghai');
 
 	class Crawler_51room
 	{
-		//采集地址
+		//城市采集默认地址
 		private $url = 'http://www.51room.co.uk/property/rent/us/new_york';
 
 		function __construct(){
@@ -80,6 +82,34 @@
 
 			return $roomList;
 		}
+
+		// 获取房间详细信息
+		public function getRoomInfo($RoomUrl)
+		{
+			$roomInfo = [];	// 公寓信息
+
+			$dom = file_get_html($RoomUrl);	// 获取dom对象
+
+
+			if ($dom != false) {
+
+				$room['ApartmentName'] = $dom->find('h3', 0)->innertext;	// 公寓名称
+				$room['ApartmentDesc'] = $dom->find('.mt10', 0)->innertext;	// 公寓介绍
+				$room['Addr'] = $dom->find('.panel-body', 1)->plaintext;	// 公寓地址
+				$price = $dom->find('.panel-price span', 0)->plaintext;
+				$room['Price'] = round(str_replace([' ', ','], '', $price), 2);	// 公寓价格
+				$imgSrc = $dom->find('.thumbmain', 0)->src;	// 主图地址
+				$imgNmae = date('Ymdhis') . rand(1000, 9999) . '.jpg';	// 保存到本地图片名称
+				copy($imgSrc, 'images/' . $imgNmae);
+				$room['Pic'] = $imgNmae;	// 本地图片地址
+				$roomInfo[] = $room;
+			}
+
+			$dom->clear();
+			unset($dom);
+
+			return $roomInfo;
+		}
 	}
 
 
@@ -96,3 +126,6 @@
 
 	// 获取页面住宿列表
 	//var_dump($crawler->getRoomList('http://www.51room.co.uk/property/rent/us/alamo/1'));
+	
+	// 获取公寓详细信息
+	var_dump($crawler->getRoomInfo('http://www.51room.co.uk/property/rent/us/addison/pid/5219'));
