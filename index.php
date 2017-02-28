@@ -137,6 +137,10 @@
 					$room['facility'][] = trim($value->plaintext);
 				}
 				
+				// 地图数据
+				$map = $dom->find('#map', 0);
+				$room['map'] = $map->attr['data-map'];
+
 				$roomInfo[] = $room;
 			}
 
