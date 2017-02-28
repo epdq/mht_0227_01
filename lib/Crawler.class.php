@@ -1,13 +1,25 @@
 <?php
 	class Crawler{
 		
-		public function init($url)
+		private $url = '';	// 爬取的链接
+		private $base_url = '';	// 爬取的网站域名
+
+		function __construct($url)
 		{
-			# code...
+			
+			$parsed_url = parse_url($url);
+			if($parsed_url != false && $parsed_url != E_WARNING){
+				$this->url = $url;
+				$scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : ''; 
+				$host = isset($parsed_url['host']) ? $parsed_url['host'] : ''; 
+				$this->base_url = $scheme . $host;
+			}else{
+				echo "爬取url地址不正确!";
+			}
 		}
 
-		public function getHtml($url){
-
+		public function getHtml(){
+			$url = $this->url;
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $url);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -24,8 +36,7 @@
   
 		}
 
-		public function reviseUrl($base_url, $url)
-		{
+		public function reviseUrl($base_url, $url){
 			if(is_array($url_list)){
 				foreach($url_list as $url_item){
 					if(preg_match("/^(http:\/\/|https:\/\/|javascript:)/", $url_item)){
@@ -45,4 +56,8 @@
 			}
 		}
 
+		public function getBaseUrl()
+		{
+			return $this->base_url;
+		}
 	}
