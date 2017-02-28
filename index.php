@@ -4,7 +4,7 @@
 	include_once "lib/Crawler.class.php";
 	include_once "lib/simple_html_dom.php";
 
-	$crawler = new crawler();
+	$crawler = new Crawler();
 	$html = $crawler->getHtml("http://www.baidu.com");
 
 	$dom = str_get_html($html);
