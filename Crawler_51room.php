@@ -94,21 +94,42 @@
 			if ($dom != false) {
 
 				$room['ApartmentName'] = $dom->find('h3', 0)->innertext;	// 公寓名称
-				$room['ApartmentDesc'] = $dom->find('.mt10', 0)->innertext;	// 公寓介绍
-				$room['Addr'] = $dom->find('.panel-body', 1)->plaintext;	// 公寓地址
+				$room['ApartmentDesc'] = str_replace(' ', '', $dom->find('.mt10', 0)->innertext);	// 公寓介绍
+				$room['Addr'] = trim($dom->find('.panel-body', 1)->plaintext);	// 公寓地址
 				$price = $dom->find('.panel-price span', 0)->plaintext;
 				$room['Price'] = round(str_replace([' ', ','], '', $price), 2);	// 公寓价格
+
+				// 主图保存
 				$imgSrc = $dom->find('.thumbmain', 0)->src;	// 主图地址
-				$imgNmae = date('Ymdhis') . rand(1000, 9999) . '.jpg';	// 保存到本地图片名称
-				copy($imgSrc, 'images/' . $imgNmae);
-				$room['Pic'] = $imgNmae;	// 本地图片地址
+				do{
+					$imgNmae = date('Ymdhis') . rand(1000, 9999) . '.jpg';	// 保存到本地图片名称
+					$copyRet = copy($imgSrc, 'images/' . $imgNmae);
+				}while ($copyRet == false);
+
+				$room['ThumbMain'] = $imgNmae;	// 本地图片地址
+
+				// 小图保存
+				$thumbSmallDom = $dom->find('.thumbsmall');
+				foreach ($thumbSmallDom as $key => $value) {
+					$imgSrc = $value->src;
+					do{
+						$imgNmae = date('Ymdhis') . rand(1000, 9999) . '.jpg';
+						$copyRet = copy($imgSrc, 'images/' . $imgNmae);
+					}while ($copyRet == false);
+					$room['ThumbSmall'][] = $imgNmae;
+				}
 
 				// 公寓设施
 				$facility = $dom->find('.mt10 .col-xs-3');
 				foreach ($facility as $key => $value) {
-					$room['facility'][] = trim($value->plaintext);
+					$room['Facility'][] = trim($value->plaintext);
 				}
 				
+				$room['Notice'] = str_replace(' ', '', $dom->find('.mt10', 2)->innertext);	// 预订须知
+
+				$room['RoomNo'] = $dom->find('.panel-price div', 1)->plaintext;
+				$room['RoomDevice'] = $dom->find('.panel-price div', 3)->plaintext;
+
 				$roomInfo[] = $room;
 			}
 
@@ -120,7 +141,7 @@
 	}
 
 
-	$crawler = new Crawler_51room();
+	//$crawler = new Crawler_51room();
 
 
 
@@ -135,4 +156,4 @@
 	//var_dump($crawler->getRoomList('http://www.51room.co.uk/property/rent/us/alamo/1'));
 	
 	// 获取公寓详细信息
-	var_dump($crawler->getRoomInfo('http://www.51room.co.uk/property/rent/us/addison/pid/5219'));
+	//var_dump($crawler->getRoomInfo('http://www.51room.co.uk/property/rent/us/addison/pid/5219'));
