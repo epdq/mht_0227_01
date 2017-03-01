@@ -60,6 +60,22 @@
 			$row = mysql_fetch_array($result, $type);
 			return $row;
 		}
+
+		/*插入数据
+		 * @param string $table         表名
+		 * @param array  $datas  		数据
+		 * @return id                   最后插入生成的ID
+		 * */
+		function insert($table, $data, $replace = false){
+			$datas[] = $data;
+	        if($this->insertAll($table, $datas, $replace)){
+	        	return $this->insert_id();
+	        }else{
+	        	return false;
+	        }
+		}
+
+
 		/*插入数据
 		 * @param string $table         表名
 		 * @param array  $datas  		数据数组
@@ -106,6 +122,9 @@
 		}
 		/*释放结果内存*/
 		function free_result(){
+			if (is_scalar($this->result)) {
+				return true;
+			}
 			return mysql_free_result($this->result);
 		}
 		/*转义 SQL 语句中使用的字符串中的特殊字符*/

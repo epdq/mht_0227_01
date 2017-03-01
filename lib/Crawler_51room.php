@@ -30,8 +30,8 @@
 			if ($cityDom != null) {
 				foreach ($cityDom as $a) {
 					$cityname = explode('<br>', $a->innertext);
-					$city['name'] = trim($cityname[0]);
-					$city['url'] = $a->href;
+					$city['CityName'] = trim($cityname[0]);
+					$city['CityUrl'] = $a->href;
 					$citylist[] = $city;
 				}
 			}
@@ -103,7 +103,7 @@
 				$imgSrc = $dom->find('.thumbmain', 0)->src;	// 主图地址
 				do{
 					$imgNmae = date('Ymdhis') . rand(1000, 9999) . '.jpg';	// 保存到本地图片名称
-					$copyRet = copy($imgSrc, 'images/' . $imgNmae);
+					$copyRet = @copy($imgSrc, 'images/' . $imgNmae);
 				}while ($copyRet == false);
 
 				$room['ThumbMain'] = $imgNmae;	// 本地图片地址
@@ -114,7 +114,7 @@
 					$imgSrc = $value->src;
 					do{
 						$imgNmae = date('Ymdhis') . rand(1000, 9999) . '.jpg';
-						$copyRet = copy($imgSrc, 'images/' . $imgNmae);
+						$copyRet = @copy($imgSrc, 'images/' . $imgNmae);
 					}while ($copyRet == false);
 					$room['ThumbSmall'][] = $imgNmae;
 				}
@@ -132,7 +132,7 @@
 
 				$room['MapUrl'] = $dom->find('#min-map a', 0)->href;
 
-				$roomInfo[] = $room;
+				$roomInfo = $room;
 			}
 
 			$dom->clear();
@@ -156,6 +156,7 @@
 			unset($dom);
 			return $mapInfo;
 		}
+
 	}
 
 

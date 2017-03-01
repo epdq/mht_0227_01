@@ -140,7 +140,7 @@
 				$map = $dom->find('#map', 0);
 				$room['map'] = $map->getAttribute('data-map');
 
-				$roomInfo[] = $room;
+				$roomInfo = $room;
 			}
 
 			$dom->clear();
