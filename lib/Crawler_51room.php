@@ -130,6 +130,8 @@
 				$room['RoomNo'] = $dom->find('.panel-price div', 1)->plaintext;
 				$room['RoomDevice'] = $dom->find('.panel-price div', 3)->plaintext;
 
+				$room['MapUrl'] = $dom->find('#min-map a', 0)->href;
+
 				$roomInfo[] = $room;
 			}
 
@@ -138,12 +140,26 @@
 
 			return $roomInfo;
 		}
+
+		public function getRoomMapInfo($mapUrl)
+		{
+			$mapInfo = [];	// 公寓信息
+			$dom = file_get_html($mapUrl);	// 获取dom对象
+			$html = $dom;
+			$pattern = '/add_map\((.*?),(.*?),/';
+			if(preg_match($pattern, $html, $map) > 0){
+				$mapInfo['Longitude'] = $map[1];
+				$mapInfo['Latitude'] = $map[2];
+			}
+
+			$dom->clear();
+			unset($dom);
+			return $mapInfo;
+		}
 	}
 
 
 	//$crawler = new Crawler_51room();
-
-
 
 	// 城市列表获取
 	//$citylist = $crawler->getCityList();
@@ -157,3 +173,6 @@
 	
 	// 获取公寓详细信息
 	//var_dump($crawler->getRoomInfo('http://www.51room.co.uk/property/rent/us/addison/pid/5219'));
+	//
+	// 获取公寓地图经纬度
+	//var_dump($crawler->getRoomMapInfo('http://www.51room.co.uk/property/rent/us/addison/map?type=property&id=5219'));

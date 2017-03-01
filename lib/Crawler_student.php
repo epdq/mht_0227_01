@@ -138,7 +138,7 @@
 				
 				// 地图数据
 				$map = $dom->find('#map', 0);
-				$room['map'] = $map->attr['data-map'];
+				$room['map'] = $map->getAttribute('data-map');
 
 				$roomInfo[] = $room;
 			}
@@ -169,4 +169,4 @@
 	//var_dump($crawler->getRoomList('https://cn.student.com/us/los-angeles?page_number=1'));
 	
 	// 获取公寓详细信息
-	//var_dump($crawler->getRoomInfo('https://cn.student.com/us/tucson/p/the-seasons-tucson'));
+	var_dump($crawler->getRoomInfo('https://cn.student.com/us/tucson/p/the-seasons-tucson'));
