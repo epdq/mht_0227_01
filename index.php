@@ -9,6 +9,42 @@
 	$dbpwd = 'root';
 	$dbname = 'room';
 
+
+
+	// 测试代码段
+	// 
+	// 
+	// 
+	// 
+	// $crawler = new Crawler_51room();
+
+	// 城市列表获取
+	// $citylist = $crawler->getCityList();
+	// var_dump($citylist);
+
+	// 城市分页数获取
+	// var_dump($crawler->getCityPage('http://www.51room.co.uk/property/rent/us/alameda'));
+
+	// 获取页面住宿列表
+	// var_dump($crawler->getRoomList('http://www.51room.co.uk/property/rent/us/alameda/1'));
+	
+	// 获取公寓详细信息
+	// var_dump($crawler->getRoomInfo('http://www.51room.co.uk/property/rent/us/alameda/pid/6149'));
+	
+	// 获取公寓地图经纬度
+	// var_dump($crawler->getRoomMapInfo('http://www.51room.co.uk/property/rent/us/alameda/map?type=property&id=6149'));
+	
+
+	// die();
+
+
+	// 
+	// 
+	// 
+	// 
+	// 
+	set_time_limit(0);
+	
 	$mysql = new MySQL($dbhost, $dbuser, $dbpwd, $dbname);
 	$crawler = new Crawler_51room();	// 51room.com 采集类
 
@@ -102,7 +138,8 @@
 				$mysql->query($sql);
 
 
-				die('ok');
+				//die('ok');
+				echo "run...\r\n";
 			}
 
 		}

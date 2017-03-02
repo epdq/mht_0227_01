@@ -162,7 +162,7 @@
 				$info = "Errno：" . $this->errno() . " -> Error：" . $this->error();
 				exit($info);
 			}else{
-				exit("MySQL ERROR.<br>错误码：". $err);
+				exit("MySQL ERROR.<br>错误码：". $err . "<br/>" . mysql_error());
 			}
 		}
 		/*定义防止注入方法(检查数据)*/

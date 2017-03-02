@@ -99,23 +99,22 @@
 				$price = $dom->find('.panel-price span', 0)->plaintext;
 				$room['Price'] = round(str_replace([' ', ','], '', $price), 2);	// 公寓价格
 
-				// 主图保存
-				$imgSrc = $dom->find('.thumbmain', 0)->src;	// 主图地址
-				do{
-					$imgNmae = date('Ymdhis') . rand(1000, 9999) . '.jpg';	// 保存到本地图片名称
-					$copyRet = @copy($imgSrc, 'images/' . $imgNmae);
-				}while ($copyRet == false);
 
-				$room['ThumbMain'] = $imgNmae;	// 本地图片地址
+				// 主图保存
+				// $imgSrc = $dom->find('.thumbmain', 0)->src;	// 主图地址
+				// $imgNmae = date('Ymdhis') . rand(1000, 9999) . '.jpg';	// 保存到本地图片名称
+				// $img = file_get_contents($imgSrc);
+				// file_put_contents('images/' . $imgNmae, $img);				
+				// $room['ThumbMain'] = $imgNmae;	// 本地图片地址
 
 				// 小图保存
 				$thumbSmallDom = $dom->find('.thumbsmall');
 				foreach ($thumbSmallDom as $key => $value) {
 					$imgSrc = $value->src;
-					do{
-						$imgNmae = date('Ymdhis') . rand(1000, 9999) . '.jpg';
-						$copyRet = @copy($imgSrc, 'images/' . $imgNmae);
-					}while ($copyRet == false);
+					$imgNmae = date('Ymdhis') . rand(1000, 9999) . '.jpg';	// 保存到本地图片名称
+					$img = file_get_contents($imgSrc);
+					file_put_contents('images/' . $imgNmae, $img);
+
 					$room['ThumbSmall'][] = $imgNmae;
 				}
 
@@ -175,10 +174,10 @@
 	//var_dump($crawler->getCityPage('http://www.51room.co.uk/property/rent/us/new_york'));
 
 	// 获取页面住宿列表
-	//var_dump($crawler->getRoomList('http://www.51room.co.uk/property/rent/us/alamo/1'));
+	//var_dump($crawler->getRoomList('http://www.51room.co.uk/property/rent/us/alameda/1'));
 	
 	// 获取公寓详细信息
-	//var_dump($crawler->getRoomInfo('http://www.51room.co.uk/property/rent/us/addison/pid/5219'));
+	//var_dump($crawler->getRoomInfo('http://www.51room.co.uk/property/rent/us/alameda/pid/6149'));
 	//
 	// 获取公寓地图经纬度
-	//var_dump($crawler->getRoomMapInfo('http://www.51room.co.uk/property/rent/us/addison/map?type=property&id=5219'));
+	//var_dump($crawler->getRoomMapInfo('http://www.51room.co.uk/property/rent/us/alameda/map?type=property&id=6149'));
