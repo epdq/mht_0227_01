@@ -46,6 +46,7 @@
 		}
 		/*获取全部记录*/
 		function getall($sql, $type=MYSQL_ASSOC){
+			$rows = [];
 			$this->query($sql);
 			if($this -> result){
 				while($row = mysql_fetch_array($this -> result,$type)){

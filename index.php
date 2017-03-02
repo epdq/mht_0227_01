@@ -12,11 +12,25 @@
 	$mysql = new MySQL($dbhost, $dbuser, $dbpwd, $dbname);
 	$crawler = new Crawler_51room();	// 51room.com 采集类
 
+	$arrFacility = [];	// 设施数组
+	$arr = $mysql->getAll('SELECT FacilityId, FacilityName FROM roomfacility WHERE 1;');
+	$arrFacility = array_column($arr, 'FacilityName', 'FacilityId');
+
+	$arrCity = [];	// 城市数组
+	$arr = $mysql->getAll('SELECT CityId, CityName FROM city WHERE 1;');
+	$arrCity = array_column($arr, 'CityName', 'CityId');
+
 	$cityList = $crawler->getCityList();	// 城市列表
 
 	foreach ($cityList as $key => $city) {
 		# code...
-		$cityId = $mysql->insert('city', $city);	// 插入数据库的城市ID
+		# 判断城市是否已经存在并获取城市ID
+		$cityId = array_search($city['CityName'], $arrCity);	// 城市ID
+		if ($cityId == false) {
+			$cityId = $mysql->insert('city', $city);	// 插入数据库的城市ID
+			$arrCity['CityId'] = $city['CityName'];
+		}
+
 
 		$cityUrl = $city['CityUrl'];	// 城市url
 		$page = $crawler->getCityPage($cityUrl);	// 当前城市分页数目
@@ -49,7 +63,26 @@
 				$data['Price'] = $roomInfo['Price'];	// 公寓价格
 				$data['Longitude'] = $mapInfo['Longitude'];	// 经度
 				$data['Latitude'] = $mapInfo['Latitude'];	// 纬度
+
+
+				// 公寓设施处理
 				$data['AttrStr'] = implode(',', $roomInfo['Facility']);	// 公寓设备
+				$arr = [];
+				foreach ($roomInfo['Facility'] as $key => $facility) {
+					$facilityId = array_search($facility, $arrFacility);
+					if ($facilityId == false) {
+						$facilityId = $mysql->insert('roomfacility', array('FacilityName' => $facility, 'AddTime' => time()));
+						$arrFacility[$facilityId] = $facility;
+					}
+					$arr[] = $facilityId;
+				}
+				$data['Facility'] = implode(',', $arr);	// 公寓设施字符串
+
+
+
+
+				$data['BedroomNum'] = $roomInfo['BedroomNum'];	// 卧室数量
+				$data['BathroomNum'] = $roomInfo['BathroomNum'];	// 卫浴数量
 				$data['Notice'] = $roomInfo['Notice'];	// 公寓预订须知
 				$data['AddTime'] = time();
 				$data['RoomNo'] = $roomInfo['RoomNo'];	// 51room网站公寓编号
@@ -61,14 +94,15 @@
 
 				// 根据公寓ID插入公寓图片
 				$sql = 'INSERT INTO roompic(ApartmentId, picPath) VALUES ';
+				$values = [];
 				foreach ($roomInfo['ThumbSmall'] as $pic) {
-					$sql = $sql . '(' . $roomId . ', \'' . $pic . '\'),';
+					$values[] = '(' . $roomId . ', \'' . $pic . '\')';
 				}
-				$sql = substr($sql, 0, -1);
+				$sql .= implode(',', $values);
 				$mysql->query($sql);
 
 
-				die();
+				die('ok');
 			}
 
 		}
