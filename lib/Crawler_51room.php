@@ -30,8 +30,13 @@
 			if ($cityDom != null) {
 				foreach ($cityDom as $a) {
 					$cityname = explode('<br>', $a->innertext);
-					$city['CityName'] = trim($cityname[0]);
+					$city['AreaCnName'] = trim($cityname[0]);	// 城市中文名
 					$city['CityUrl'] = $a->href;
+					$pattern = '#/us/(.*?)$#';
+					if(preg_match($pattern, $a->href, $arrAreaName)){
+						$city['AreaEngName'] = ucwords(str_replace('_', ' ', $arrAreaName[1]));	// 城市英文名
+						$city['FirstLetter'] = substr($city['AreaEngName'], 0, 1);	// 城市首字母
+					}
 					$citylist[] = $city;
 				}
 			}
@@ -90,11 +95,10 @@
 
 			$dom = file_get_html($RoomUrl);	// 获取dom对象
 
-
 			if ($dom != false) {
 
 				$room['ApartmentName'] = $dom->find('h3', 0)->innertext;	// 公寓名称
-				$room['ApartmentDesc'] = str_replace(' ', '', $dom->find('.mt10', 0)->innertext);	// 公寓介绍
+				$room['Introduce'] = str_replace(' ', '', $dom->find('.mt10', 0)->innertext);	// 公寓介绍
 				$room['Addr'] = trim($dom->find('.panel-body', 1)->plaintext);	// 公寓地址
 				$price = $dom->find('.panel-price span', 0)->plaintext;
 				$room['Price'] = round(str_replace([' ', ','], '', $price), 2);	// 公寓价格
@@ -111,20 +115,27 @@
 				$thumbSmallDom = $dom->find('.thumbsmall');
 				foreach ($thumbSmallDom as $key => $value) {
 					$imgSrc = $value->src;
-					$imgNmae = date('Ymdhis') . rand(1000, 9999) . '.jpg';	// 保存到本地图片名称
-					$img = file_get_contents($imgSrc);
-					file_put_contents('images/' . $imgNmae, $img);
+					//$imgNmae = date('Ymdhis') . rand(1000, 9999) . '.jpg';	// 保存到本地图片名称
+					//$img = file_get_contents($imgSrc);
+					//file_put_contents('images/' . $imgNmae, $img);
+					//$room['ThumbSmall'][] = $imgNmae;
 
-					$room['ThumbSmall'][] = $imgNmae;
+					$room['ThumbSmall'][] = $imgSrc;
 				}
 
 				// 公寓设施
 				$facility = $dom->find('.mt10 .col-xs-3');
-				foreach ($facility as $key => $value) {
-					$room['Facility'][] = trim($value->plaintext);
+				if ($facility != false) {
+					foreach ($facility as $key => $value) {
+						$room['Facility'][] = trim($value->plaintext);
+					}
 				}
-				
-				$room['Notice'] = str_replace(' ', '', $dom->find('.mt10', 2)->innertext);	// 预订须知
+
+				$noticeDom = $dom->find('.mt10', 2);
+				if ($noticeDom != false) {
+					$room['Notice'] = str_replace(' ', '', $noticeDom->innertext);	// 预订须知
+				}
+
 
 				$room['RoomNo'] = $dom->find('.panel-price div', 1)->plaintext;
 				$room['RoomDevice'] = $dom->find('.panel-price div', 3)->plaintext;
@@ -137,9 +148,13 @@
 				$room['MapUrl'] = $dom->find('#min-map a', 0)->href;
 
 				$roomInfo = $room;
+			}else{
+				return false;
 			}
 
-			$dom->clear();
+			if (!is_scalar($dom)) {
+				$dom->clear();
+			}
 			unset($dom);
 
 			return $roomInfo;
