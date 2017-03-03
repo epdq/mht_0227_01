@@ -105,9 +105,11 @@
 					$data['CityId'] = $cityId;	// 所在城市ID
 					$data['Addr'] = $roomInfo['Addr'];	// 公寓地址
 					$data['Price'] = $roomInfo['Price'];	// 公寓价格
-					$data['Longitude'] = $mapInfo['Longitude'];	// 经度
-					$data['Latitude'] = $mapInfo['Latitude'];	// 纬度
 
+					if (!empty($mapInfo)) {
+						$data['Longitude'] = $mapInfo['Longitude'];	// 经度
+						$data['Latitude'] = $mapInfo['Latitude'];	// 纬度
+					}
 
 					// 公寓设施处理
 					if (isset($roomInfo['Facility'])) {
@@ -125,11 +127,10 @@
 					}
 
 
-					$data['BedroomNum'] = $roomInfo['BedroomNum'];	// 卧室数量
-					$data['BathroomNum'] = $roomInfo['BathroomNum'];	// 卫浴数量
-					if (isset($roomInfo['Notice'])) {
-						$data['Notice'] = $roomInfo['Notice'];	// 公寓预订须知
-					}
+					$data['BedroomNum'] = isset($roomInfo['BedroomNum']) ? $roomInfo['BedroomNum'] : 0;	// 卧室数量
+					$data['BathroomNum'] = isset($roomInfo['BathroomNum']) ? $roomInfo['BathroomNum'] : 0;	// 卫浴数量
+					$data['Notice'] = isset($roomInfo['Notice']) ? $roomInfo['Notice'] : '';	// 公寓预订须知
+
 					$data['AddTime'] = time();
 					$data['RoomNo'] = $roomInfo['RoomNo'];	// 51room网站公寓编号
 					$data['RoomDevice'] = $roomInfo['RoomDevice'];	// 51room网站右上角公寓设备

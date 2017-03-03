@@ -138,12 +138,16 @@
 
 
 				$room['RoomNo'] = $dom->find('.panel-price div', 1)->plaintext;
-				$room['RoomDevice'] = $dom->find('.panel-price div', 3)->plaintext;
-				$pattern = '/x (\d+).*?(\d+)/';
-				if(preg_match($pattern, $room['RoomDevice'], $RoomDevice) > 0){
-					$room['BedroomNum'] = $RoomDevice[1];	// 卧室数量
-					$room['BathroomNum'] = $RoomDevice[2];	// 卫浴数量
+				$deviceDom = $dom->find('.panel-price div', 3);
+				if ($deviceDom != false) {
+					$room['RoomDevice'] = $deviceDom->plaintext;
+					$pattern = '/x (\d+).*?(\d+)/';
+					if(preg_match($pattern, $room['RoomDevice'], $RoomDevice) > 0){
+						$room['BedroomNum'] = $RoomDevice[1];	// 卧室数量
+						$room['BathroomNum'] = $RoomDevice[2];	// 卫浴数量
+					}
 				}
+
 
 				$room['MapUrl'] = $dom->find('#min-map a', 0)->href;
 
@@ -171,7 +175,9 @@
 				$mapInfo['Latitude'] = $map[2];
 			}
 
-			$dom->clear();
+			if (!is_scalar($dom)) {
+				$dom->clear();
+			}
 			unset($dom);
 			return $mapInfo;
 		}
