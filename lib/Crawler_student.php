@@ -16,7 +16,7 @@
 		}
 
 		// 获取student城市列表
-		public function getCityList()
+		public function getCityList($url = true)
 		{
 
 			$citylist = [];	// 城市列表
@@ -30,8 +30,15 @@
 			if ($cityDom != null) {
 				foreach ($cityDom as $a) {
 					$cityname = explode('<br>', $a->innertext);
-					$city['name'] = trim($cityname[0]);
-					$city['url'] = $this->base_url . $a->href;
+					$city['AreaCnName'] = trim($cityname[0]);
+					$pattern = '#/us/(.*?)$#';
+					if(preg_match($pattern, $a->href, $arrAreaName)){
+						$city['AreaEngName'] = ucwords(str_replace('-', ' ', $arrAreaName[1]));	// 城市英文名
+						$city['FirstLetter'] = substr($city['AreaEngName'], 0, 1);	// 城市首字母
+					}
+					if ($url) {
+						$city['url'] = $this->base_url . $a->href;
+					}
 					$citylist[] = $city;
 				}
 			}
@@ -59,8 +66,14 @@
 			if ($schoolDom != null) {
 				foreach ($schoolDom as $a) {
 					$schoolName = explode('<br>', $a->innertext);
-					$school['name'] = trim($schoolName[0]);
-					$school['url'] = $this->base_url . $a->href;
+					$school['SchoolCnName'] = trim($schoolName[0]);
+					$school['URL'] = $this->base_url . $a->href;
+					$pattern = '#/u/(.*?)$#';
+					if(preg_match($pattern, $a->href, $arrSchoolName)){
+						$school['SchoolEngName'] = ucwords(str_replace('-', ' ', $arrSchoolName[1]));	// 城市英文名
+						//$school['FirstLetter'] = substr($school['SchoolEngName'], 0, 1);	// 城市首字母
+					}
+					
 					$schoolList[] = $school;
 				}
 			}
@@ -70,6 +83,26 @@
 			unset($dom);
 
 			return $schoolList;
+		}
+
+		// 获取学校所属城市信息
+		public function getSchoolArea($schoolURL='')
+		{
+			$dom = file_get_html($schoolURL);	// 获取dom对象
+			$cityDom = $dom->find('.breadcrumb__text', 1);	// 获取城市span标签对象
+			if ($cityDom != null) {
+				$city['AreaCnName'] = str_replace(' / ', '', $cityDom->innertext);
+			}
+			$aDom = $dom->find('.breadcrumb__container a', 0);	
+			if ($aDom != null) {
+				$city['AreaEngName'] = ucwords(str_replace(['/us/', '-'], ['', ' '],  $aDom->href));
+				$city['FirstLetter'] = substr($city['AreaEngName'], 0, '1');
+			}
+			if (isset($dom)) {
+				$dom->clear();
+			}
+			unset($dom);
+			return $city;
 		}
 
 		// 获取城市所在的公寓分页数量
@@ -119,31 +152,84 @@
 
 			if ($dom != false) {
 
-				$room['ApartmentName'] = $dom->find('h1', 0)->innertext;	// 公寓名称
-				$room['ApartmentDesc'] = $dom->find('.about__summary-text', 0)->innertext;	// 公寓介绍
+				$room['ApartmentName'] = trim($dom->find('h1', 0)->innertext);	// 公寓名称
+				$room['Introduce'] = $dom->find('.about__summary-text', 0)->innertext;	// 公寓介绍
 				$room['Addr'] = $dom->find('.about__feature-text', 0)->plaintext;	// 公寓地址
 				$price = $dom->find('.room-matrix__categories-price', 0)->plaintext;
-				$room['Price'] = $price;	// 公寓价格
+				$price = str_replace(['$', ',', ' '], '', $price);
+				$room['Price'] = (double)$price;	// 公寓价格
 				$imgSrc = $dom->find('.hero-banner__image', 0)->src;	// 主图地址
 				$imgSrc = 'http:' . $imgSrc;
-				$imgNmae = date('Ymdhis') . rand(1000, 9999) . '.jpg';	// 保存到本地图片名称
-				copy($imgSrc, 'images/' . $imgNmae);
-				$room['Pic'] = $imgNmae;	// 本地图片地址
+				//$imgNmae = date('Ymdhis') . rand(1000, 9999) . '.jpg';	// 保存到本地图片名称
+				//copy($imgSrc, 'images/' . $imgNmae);
+				$room['Images'] = [];
+				$room['Images'][] = $imgSrc;	// 本地图片地址
 
+				$imgDom = $dom->find('.gallery__item-image');
+				if ($imgDom) {
+					# code...
+					foreach ($imgDom as $key => $img) {
+						if ($img->src == '') {
+							$room['Images'][] = 'http:' . $img->getAttribute('data-src');
+						}else{
+							$room['Images'][] = 'http:' . $img->src;
+						}
+						
+					}
+				}
 				// 公寓设施
-				$facility = $dom->find('.accordion__content div');
-				foreach ($facility as $key => $value) {
-					$room['facility'][] = trim($value->plaintext);
+				$facilityDom = $dom->find('.accordion__content', 0);
+				if ($facilityDom) {
+					$facility = $facilityDom->plaintext;
+					$pattern = '#\s*(\S+)\s*#';
+					if(preg_match_all($pattern, $facility, $arrFacility)){
+							$room['Facilites'] = $arrFacility[1];
+					}
+				}
+
+				// 房租包含
+				$facilityDom = $dom->find('.accordion__content', 1);
+				if ($facilityDom) {
+					$facility = $facilityDom->plaintext;
+					$pattern = '#\s*(\S+)\s*#';
+					if(preg_match_all($pattern, $facility, $arrFacility)){
+							$room['ContainFacilities'] = $arrFacility[1];
+					}
+				}
+
+
+				// 安全保障
+				$facilityDom = $dom->find('.accordion__content', 2);
+				if ($facilityDom) {
+					$facility = $facilityDom->plaintext;
+					$pattern = '#\s*(\S+)\s*#';
+					if(preg_match_all($pattern, $facility, $arrFacility)){
+							$room['SecurityFacilities'] = $arrFacility[1];
+					}
 				}
 				
+				// 房型
+				// room-matrix__type
+				$layoutDom = $dom->find('h3.room-matrix__type');
+				if ($layoutDom) {
+					foreach ($layoutDom as $key => $value) {
+						$room['layout'][] = $value->plaintext;
+					}
+				}
+
+
 				// 地图数据
 				$map = $dom->find('#map', 0);
-				$room['map'] = $map->getAttribute('data-map');
+				$mapInfo = json_decode(htmlspecialchars_decode($map->getAttribute('data-map')), true);
+				$room['Longitude'] = $mapInfo['property_data']['longitude'];
+				$room['Latitude'] = $mapInfo['property_data']['latitude'];
 
 				$roomInfo = $room;
 			}
 
-			$dom->clear();
+			if (!is_scalar($dom)) {
+				$dom->clear();
+			}
 			unset($dom);
 
 			return $roomInfo;
@@ -151,16 +237,22 @@
 	}
 
 
-	$crawler = new Crawler_student();
+	// $crawler = new Crawler_student();
 
 	// 城市列表获取
-	// $citylist = $crawler->getCityList();
-	// var_dump($citylist);
+	 // $citylist = $crawler->getCityList();
+	 // var_dump($citylist);
 
 
 	// 学校列表获取
 	// $schoolList = $crawler->getSchoolList();
 	// var_dump($schoolList);
+	 // die();
+
+	// 学校所在城市
+	// $area = $crawler->getSchoolArea('https://cn.student.com/us/tempe/u/itt-technical-institute-tempe-campus');
+	// var_dump($area);
+	// die();
 
 	// 城市分页数获取
 	//var_dump($crawler->getCityPage('https://cn.student.com/us/los-angeles'));
@@ -169,4 +261,5 @@
 	//var_dump($crawler->getRoomList('https://cn.student.com/us/los-angeles?page_number=1'));
 	
 	// 获取公寓详细信息
-	var_dump($crawler->getRoomInfo('https://cn.student.com/us/tucson/p/the-seasons-tucson'));
+	// var_dump($crawler->getRoomInfo('https://cn.student.com/us/new-york-city/p/532-east-83rd-street'));
+	// die();

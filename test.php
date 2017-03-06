@@ -1,10 +1,13 @@
 <?php
 
-	$arr = [];
-	if (empty($arr)) {
+	function fn($value='')
+	{
 		# code...
-		echo("arg1");
-
-	}else{
-		echo "string";
+		# 
+		#
+		$a = 100; 
+		return $a == 1 ? 10 : 100;
 	}
+
+
+	echo fn();
