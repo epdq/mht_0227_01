@@ -12,3 +12,6 @@
 		# code...
 		echo "string";
 	}
+
+
+	echo "string";
