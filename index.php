@@ -19,12 +19,47 @@
 	$crawler = new Crawler_student();	// student.com 采集类
 
 
-	// 采集城市列表
+
+
+
+	// =======================================
+	// 采集插入城市列表
 	// $cityList = $crawler->getCityList(false);	// 学校列表
 	// $mysql->insertAll('house_area', $cityList);
 	// echo "城市采集完成";
 	// exit();
+	// =========================================
 
+
+
+
+	// =========================================
+	//  采集插入学校列表
+
+	// $arrCity = [];	// 城市数组
+	// $arr = $mysql->getAll('SELECT AreaID, AreaCnName FROM house_area;');
+	// $arrCity = array_column($arr, 'AreaCnName', 'AreaID');
+
+	// $schoolList = $crawler->getSchoolList();	// 学校列表
+
+	// foreach ($schoolList as $key => $school) {
+	// 	# code...
+	// 	$arrSchool = [];
+	// 	$city = $crawler->getSchoolArea($school['URL']);
+	// 	$school['AreaID'] = (int)array_search($city['AreaCnName'], $arrCity);
+	// 	//var_dump($school);
+	// 	$mysql->insert('house_school', $school);
+	// 	echo "insert..." . rand(1000, 9999) . "\r\n";
+	// }
+
+	// echo "学校采集完成";
+	// exit();
+	// =======================================
+
+
+
+
+	// 采集公寓信息
 
 	$arrFacility = [];	// 设施数组
 	$arr = $mysql->getAll('SELECT FacilitiesID, FacilitiesName FROM house_facilities');

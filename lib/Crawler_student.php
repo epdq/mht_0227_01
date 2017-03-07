@@ -71,7 +71,7 @@
 					$pattern = '#/u/(.*?)$#';
 					if(preg_match($pattern, $a->href, $arrSchoolName)){
 						$school['SchoolEngName'] = ucwords(str_replace('-', ' ', $arrSchoolName[1]));	// 城市英文名
-						//$school['FirstLetter'] = substr($school['SchoolEngName'], 0, 1);	// 城市首字母
+						//$school['FirstLetter'] = substr($school['SchoolEngName'], 0, 1);	// 学校首字母
 					}
 					
 					$schoolList[] = $school;
@@ -89,18 +89,22 @@
 		public function getSchoolArea($schoolURL='')
 		{
 			$dom = file_get_html($schoolURL);	// 获取dom对象
-			$cityDom = $dom->find('.breadcrumb__text', 1);	// 获取城市span标签对象
-			if ($cityDom != null) {
-				$city['AreaCnName'] = str_replace(' / ', '', $cityDom->innertext);
+			if ($dom) {
+				# code...
+				$cityDom = $dom->find('.breadcrumb__text', 1);	// 获取城市span标签对象
+				if ($cityDom != null) {
+					$city['AreaCnName'] = str_replace(' / ', '', $cityDom->innertext);
+				}
+				$aDom = $dom->find('.breadcrumb__container a', 0);	
+				if ($aDom != null) {
+					$city['AreaEngName'] = ucwords(str_replace(['/us/', '-'], ['', ' '],  $aDom->href));
+					$city['FirstLetter'] = substr($city['AreaEngName'], 0, '1');
+				}
+				if (isset($dom)) {
+					$dom->clear();
+				}
 			}
-			$aDom = $dom->find('.breadcrumb__container a', 0);	
-			if ($aDom != null) {
-				$city['AreaEngName'] = ucwords(str_replace(['/us/', '-'], ['', ' '],  $aDom->href));
-				$city['FirstLetter'] = substr($city['AreaEngName'], 0, '1');
-			}
-			if (isset($dom)) {
-				$dom->clear();
-			}
+
 			unset($dom);
 			return $city;
 		}
