@@ -158,6 +158,10 @@
 				$price = $dom->find('.room-matrix__categories-price', 0)->plaintext;
 				$price = str_replace(['$', ',', ' '], '', $price);
 				$room['Price'] = (double)$price;	// 公寓价格
+				$minLeaseDom = $dom->find('.room-matrix__listing-tendancy', 0);	// 最短租期
+				if ($minLeaseDom) {
+					$room['MinLease'] = (int)str_replace(['最短租期', '个月', '起租', 'r', '\n'], '', $minLeaseDom->plaintext);
+				}
 				$imgSrc = $dom->find('.hero-banner__image', 0)->src;	// 主图地址
 				$imgSrc = 'http:' . $imgSrc;
 				//$imgNmae = date('Ymdhis') . rand(1000, 9999) . '.jpg';	// 保存到本地图片名称
@@ -220,9 +224,13 @@
 
 				// 地图数据
 				$map = $dom->find('#map', 0);
-				$mapInfo = json_decode(htmlspecialchars_decode($map->getAttribute('data-map')), true);
-				$room['Longitude'] = $mapInfo['property_data']['longitude'];
-				$room['Latitude'] = $mapInfo['property_data']['latitude'];
+				if ($map) {
+					$mapInfo = json_decode(htmlspecialchars_decode($map->getAttribute('data-map')), true);
+					$room['Longitude'] = $mapInfo['property_data']['longitude'];
+					$room['Latitude'] = $mapInfo['property_data']['latitude'];
+				}
+
+
 
 				$roomInfo = $room;
 			}
@@ -237,7 +245,7 @@
 	}
 
 
-	// $crawler = new Crawler_student();
+	 // $crawler = new Crawler_student();
 
 	// 城市列表获取
 	 // $citylist = $crawler->getCityList();
@@ -261,5 +269,5 @@
 	//var_dump($crawler->getRoomList('https://cn.student.com/us/los-angeles?page_number=1'));
 	
 	// 获取公寓详细信息
-	// var_dump($crawler->getRoomInfo('https://cn.student.com/us/new-york-city/p/532-east-83rd-street'));
-	// die();
+	 // var_dump($crawler->getRoomInfo('https://cn.student.com/us/new-york-city/p/532-east-83rd-street'));
+	 // die();

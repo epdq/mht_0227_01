@@ -99,9 +99,12 @@
 					$data['SchoolID'] = $schoolId;	// 所在学校ID
 					$data['Addr'] = $roomInfo['Addr'];	// 公寓地址
 					$data['Price'] = $roomInfo['Price'];	// 公寓价格
+					$data['MinLease'] = isset($roomInfo['MinLease']) ? $roomInfo['MinLease'] : 0;
+					if (isset($roomInfo['MinLease'])) {
+						$data['Longitude'] = $roomInfo['Longitude'];	// 经度
+						$data['Latitude'] = $roomInfo['Latitude'];	// 纬度
+					}
 
-					$data['Longitude'] = $roomInfo['Longitude'];	// 经度
-					$data['Latitude'] = $roomInfo['Latitude'];	// 纬度
 
 
 					// 公寓设施处理
