@@ -110,11 +110,14 @@
 		{
 			$page = 1;	// 分页数目
 			$dom = file_get_html($cityUrl);	// 获取dom对象
-			$pageDom = $dom->find('.pagination__item a');	// 获取分页a标签对象
-			if ($pageDom != null) {
-				$page = $dom->find('.pagination__item a', -1)->innertext;
+			if ($dom) {
+				# code...
+				$pageDom = $dom->find('.pagination__item a');	// 获取分页a标签对象
+				if ($pageDom != null) {
+					$page = $dom->find('.pagination__item a', -1)->innertext;
+				}
+				$dom->clear();
 			}
-			$dom->clear();
 			unset($dom);
 			return (int)$page;
 		}
@@ -125,17 +128,20 @@
 			$roomList = [];	// 城市列表
 
 			$dom = file_get_html($pageUrl);	// 获取dom对象
+			if ($dom) {
+				# code...
+				$roomDom = $dom->find('a.property-image__container');	// 获取住宿a标签dom对象集合
 
-			$roomDom = $dom->find('a.property-image__container');	// 获取住宿a标签dom对象集合
-
-			if ($roomDom != null) {
-				foreach ($roomDom as $a) {
-					$room['url'] = $this->base_url . $a->href;
-					$roomList[] = $room;
+				if ($roomDom != null) {
+					foreach ($roomDom as $a) {
+						$room['url'] = $this->base_url . $a->href;
+						$roomList[] = $room;
+					}
 				}
+
+				$dom->clear(); 
 			}
 
-			$dom->clear(); 
 			unset($roomDom);
 			unset($dom);
 
@@ -154,7 +160,7 @@
 
 				$room['ApartmentName'] = trim($dom->find('h1', 0)->innertext);	// 公寓名称
 				$room['Introduce'] = $dom->find('.about__summary-text', 0)->innertext;	// 公寓介绍
-				$room['Addr'] = $dom->find('.about__feature-text', 0)->plaintext;	// 公寓地址
+				$room['Address'] = $dom->find('.about__feature-text', 0)->plaintext;	// 公寓地址
 				$price = $dom->find('.room-matrix__categories-price', 0)->plaintext;
 				$price = str_replace(['$', ',', ' '], '', $price);
 				$room['Price'] = (double)$price;	// 公寓价格

@@ -27,16 +27,16 @@
 
 
 	$arrFacility = [];	// 设施数组
-	$arr = $mysql->getAll('SELECT FacilityID, FacilityName FROM house_facilities');
-	$arrFacility = array_column($arr, 'FacilityName', 'FacilityID');
+	$arr = $mysql->getAll('SELECT FacilitiesID, FacilitiesName FROM house_facilities');
+	$arrFacility = array_column($arr, 'FacilitiesName', 'FacilitiesID');
 
 	$arrContainFacility = [];	// 房租包含数组
 	$arr = $mysql->getAll('SELECT ContainID, ContainName FROM house_contain');
 	$arrContainFacility = array_column($arr, 'ContainName', 'ContainID');
 
 	$arrSecurityFacility = [];	// 安全保障数组
-	$arr = $mysql->getAll('SELECT SecurityFacilitiesID, SecurityFacilitiesName FROM house_security_facilities');
-	$arrSecurityFacility = array_column($arr, 'SecurityFacilitiesName', 'SecurityFacilitiesID');
+	$arr = $mysql->getAll('SELECT SecurityFacilitiesID, TagName FROM house_security_facilities');
+	$arrSecurityFacility = array_column($arr, 'TagName', 'SecurityFacilitiesID');
 
 	$arrCity = [];	// 城市数组
 	$arr = $mysql->getAll('SELECT AreaID, AreaCnName FROM house_area;');
@@ -97,7 +97,7 @@
 					$data['Introduce'] = $roomInfo['Introduce'];	// 公寓详情
 					$data['AreaID'] = $areaId;	// 所在城市ID
 					$data['SchoolID'] = $schoolId;	// 所在学校ID
-					$data['Addr'] = $roomInfo['Addr'];	// 公寓地址
+					$data['Address'] = $roomInfo['Address'];	// 公寓地址
 					$data['Price'] = $roomInfo['Price'];	// 公寓价格
 					$data['MinLease'] = isset($roomInfo['MinLease']) ? $roomInfo['MinLease'] : 0;
 					if (isset($roomInfo['MinLease'])) {
@@ -114,7 +114,7 @@
 						foreach ($roomInfo['Facilites'] as $key => $facility) {
 							$facilityId = array_search($facility, $arrFacility);
 							if ($facilityId == false) {
-								$facilityId = $mysql->insert('house_facilities', array('FacilityName' => $facility));
+								$facilityId = $mysql->insert('house_facilities', array('FacilitiesName' => $facility));
 								$arrFacility[$facilityId] = $facility;
 							}
 							$arr[] = $facilityId;
@@ -144,7 +144,7 @@
 						foreach ($roomInfo['SecurityFacilities'] as $key => $facility) {
 							$facilityId = array_search($facility, $arrSecurityFacility);
 							if ($facilityId == false) {
-								$facilityId = $mysql->insert('house_security_facilities', array('SecurityFacilitiesName' => $facility));
+								$facilityId = $mysql->insert('house_security_facilities', array('TagName' => $facility));
 								$arrSecurityFacility[$facilityId] = $facility;
 							}
 							$arr[] = $facilityId;

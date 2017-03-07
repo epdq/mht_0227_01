@@ -1,13 +1,14 @@
 <?php
-
-	function fn($value='')
-	{
+	$i = 1;
+	while ($a = 10 - $i) {
 		# code...
-		# 
-		#
-		$a = 100; 
-		return $a == 1 ? 10 : 100;
+		$i++;
+		echo $a;
 	}
 
 
-	echo fn();
+	$arr = [];
+	if (empty($arr)) {
+		# code...
+		echo "string";
+	}
