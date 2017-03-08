@@ -6,7 +6,7 @@
 
 	date_default_timezone_set('Asia/Shanghai');
 
-	class Crawler_51room
+	class Crawler51room
 	{
 		//城市采集默认地址
 		private $url = 'http://www.51room.co.uk/property/rent/us/new_york';
@@ -185,7 +185,7 @@
 	}
 
 
-	//$crawler = new Crawler_51room();
+	//$crawler = new Crawler51room();
 
 	// 城市列表获取
 	//$citylist = $crawler->getCityList();

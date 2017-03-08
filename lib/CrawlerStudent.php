@@ -5,7 +5,7 @@
 
 	date_default_timezone_set('Asia/Shanghai');
 
-	class Crawler_student
+	class CrawlerStudent
 	{
 		private $base_url = 'https://cn.student.com';
 		//城市采集默认地址
@@ -255,7 +255,7 @@
 	}
 
 
-	 // $crawler = new Crawler_student();
+	 // $crawler = new CrawlerStudent();
 
 	// 城市列表获取
 	 // $citylist = $crawler->getCityList();

@@ -5,7 +5,7 @@
 	}
 	
 	include_once 'lib/Mysql.class.php';
-	include_once 'lib/Crawler_51room.php';
+	include_once 'lib/Crawler51room.php';
 
 	$dbhost = '127.0.0.1';
 	$dbuser = 'root';
@@ -57,7 +57,7 @@
 	set_time_limit(0);
 
 	$mysql = new MySQL($dbhost, $dbuser, $dbpwd, $dbname);
-	$crawler = new Crawler_51room();	// 51room.com 采集类
+	$crawler = new Crawler51room();	// 51room.com 采集类
 
 	$arrFacility = [];	// 设施数组
 	$arr = $mysql->getAll('SELECT FacilityID, FacilityName FROM house_facilities');
