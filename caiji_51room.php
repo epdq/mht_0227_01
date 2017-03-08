@@ -4,8 +4,8 @@
 		die('end');
 	}
 	
-	include_once 'lib/Mysql.class.php';
-	include_once 'lib/Crawler51room.php';
+	include_once 'class/Mysql.class.php';
+	include_once 'class/Crawler51room.php';
 
 	$dbhost = '127.0.0.1';
 	$dbuser = 'root';

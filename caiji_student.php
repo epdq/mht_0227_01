@@ -1,8 +1,5 @@
-<?php
+<?php 
 
-    if ($argv[1] != 'start') {
-        die('end');
-    }
 
     include_once 'class/Mysql.class.php';
     include_once 'class/CrawlerStudent.php';
@@ -15,14 +12,19 @@
 
     set_time_limit(0);
 
-    gather_house();
+    if(gather_house()){
+        echo "<script>setTimeout(function (){location.reload();}, 3000);</script>";    // 刷新页面
+    }else{
+        echo "<script>window.close();</script>";
+    }
+
 
 
     /**
      * 采集student公寓信息
      * @Author   Cai
      * @DateTime 2017-03-08
-     * @return   [type]     [description]
+     * @return   boolean     采集成功true,无采集内容false
      */
     function gather_house()
     {
@@ -31,50 +33,7 @@
         $mysql   = new MySQL($dbhost, $dbuser, $dbpwd, $dbname);
         $crawler = new CrawlerStudent(); // student.com 采集类
 
-        // =======================================
-        // 采集插入城市列表
-        // $cityList = $crawler->getCityList(false);    // 学校列表
-        // $mysql->insertAll('house_area', $cityList);
-        // echo "城市采集完成";
-        // exit();
-        // =========================================
 
-        // =========================================
-        //  采集插入学校列表
-
-        // $arrCity = [];    // 城市数组
-        // $arr = $mysql->getAll('SELECT AreaID, AreaCnName FROM house_area;');
-        // $arrCity = array_column($arr, 'AreaCnName', 'AreaID');
-
-        // $schoolList = $crawler->getSchoolList();    // 学校列表
-
-        // foreach ($schoolList as $key => $school) {
-        //     # code...
-        //     $arrSchool = [];
-        //     $city = $crawler->getSchoolArea($school['URL']);
-        //     $school['AreaID'] = (int)array_search($city['AreaCnName'], $arrCity);
-        //     //var_dump($school);
-        //     $mysql->insert('house_school', $school);
-        //     echo "insert..." . rand(1000, 9999) . "\r\n";
-        // }
-
-        // echo "学校采集完成";
-        // exit();
-        // =======================================
-
-        // 读取上次采集位置
-        // $breakpoint = file_get_contents('breakpoint.txt');
-        // if (!$breakpoint) {
-        //     $breakpoint = [
-        //         "schoolIndex" => -1,
-        //         "pageIndex"   => -1,
-        //         "listIndex"   => -1,
-        //     ];
-        // } else {
-        //     $breakpoint = json_decode($breakpoint, true);
-        // }
-
-        // 采集公寓信息
 
         $arrFacility = []; // 设施数组
         $arr         = $mysql->getAll('SELECT FacilitiesID, FacilitiesName FROM house_facilities');
@@ -88,71 +47,23 @@
         $arr                 = $mysql->getAll('SELECT SecurityFacilitiesID, SecurityFacilitiesName FROM house_security_facilities');
         $arrSecurityFacility = array_column($arr, 'SecurityFacilitiesName', 'SecurityFacilitiesID');
 
-        $arrCity = []; // 城市数组
-        $arr     = $mysql->getAll('SELECT AreaID, AreaCnName FROM house_area;');
-        $arrCity = array_column($arr, 'AreaCnName', 'AreaID');
 
-        $arrSchool = []; // 学校数组
-        $arr       = $mysql->getAll('SELECT SchoolID, SchoolCnName FROM house_school;');
-        $arrSchool = array_column($arr, 'SchoolCnName', 'SchoolID');
 
-        $schoolList = $crawler->getSchoolList(); // 学校列表
 
-        foreach ($schoolList as $schoolIndex => $school) {
-            # code...
 
-            // 已经读取城市跳过
-            // if ((int) $schoolIndex <= (int) $breakpoint['schoolIndex']) {
-            //     continue;
-            // }
-
-            $schoolUrl = $school['URL']; // 城市url
-
-            $areaInfo = $crawler->getSchoolArea($schoolUrl); // 城市名称
-
-            $areaId = array_search($areaInfo['AreaCnName'], $arrCity); // 城市ID
-            if ($areaId == false) {
-                $areaId           = $mysql->insert('house_area', $areaInfo); // 插入数据库的城市ID
-                $arrCity[$areaId] = $areaInfo['AreaCnName'];
-                //file_put_contents('area.log', $areaInfo['AreaCnName'] . '\r\n', FILE_APPEND);
-            }
-            $school['AreaID'] = $areaId;
-
-            # 判断学校是否已经存在并获取学校ID
-            $schoolId = array_search($school['SchoolCnName'], $arrSchool); // 城市ID
-
-            if ($schoolId == false) {
-                $schoolId             = $mysql->insert('house_school', $school); // 插入数据库的学校ID
-                $arrSchool[$schoolId] = $school['SchoolCnName'];
-
-            }
-
-            $page = $crawler->getCityPage($schoolUrl); // 当前城市分页数目
-
-            // 循环城市分页列表
-            for ($pageIndex = 1; $pageIndex <= $page; $pageIndex++) {
-
-                // 已经读取页数跳过
-                // if ((int) $pageIndex <= (int) $breakpoint['pageIndex']) {
-                //     continue;
-                // }
-
-                $pageUrl  = $schoolUrl . '?page_number=' . $pageIndex;
-                $roomList = [];
-                $roomList = $crawler->getRoomList($pageUrl);
-
-                // 循环公寓列表
-                foreach ($roomList as $listIndex => $room) {
-
-                    // 已经读取列表跳过
-                    // if ((int) $listIndex <= (int) $breakpoint['listIndex']) {
-                    //     continue;
-                    // }
+        $schoolInfo = $mysql->getone('SELECT SchoolID, AreaID, URL FROM house_school WHERE Status = 0 ORDER BY SchoolID ASC');
+        if ($schoolInfo) {
+            
+            // 采集前5页数据
+            for ($page = 1; $page < 6; $page++) { 
+                $houseLists = [];
+                $houseLists = $crawler->getRoomList($schoolInfo['URL'] . '?page_number=' . $page);
+                foreach ($houseLists as $index => $room) {
 
                     // 获取公寓详情
                     $roomUrl = $room['url'];
 
-                    $GatherInfo = $mysql->getone('SELECT GatherID, SchollID, ApartmentID FROM house_gather WHERE GatherUrl = \'' . $roomUrl . '\'');
+                    $GatherInfo = $mysql->getone('SELECT GatherID, SchoolID, ApartmentID FROM house_gather WHERE GatherUrl = \'' . $roomUrl . '\'');
 
                     // 未采集的开始采集
                     if (!$GatherInfo) {
@@ -165,8 +76,8 @@
                             $data                  = [];
                             $data['ApartmentName'] = $roomInfo['ApartmentName']; // 公寓名
                             $data['Introduce']     = $roomInfo['Introduce']; // 公寓详情
-                            $data['AreaID']        = $areaId; // 所在城市ID
-                            $data['SchoolID']      = $schoolId; // 所在学校ID
+                            $data['AreaID']        = $schoolInfo['AreaID']; // 所在城市ID
+                            $data['SchoolID']      = $schoolInfo['SchoolID']; // 所在学校ID
                             $data['Address']       = $roomInfo['Address']; // 公寓地址
                             $data['Price']         = isset($roomInfo['Price']) ? $roomInfo['Price'] : 0.00; // 公寓价格
                             $data['MinLease']      = isset($roomInfo['MinLease']) ? $roomInfo['MinLease'] : 0;
@@ -220,6 +131,8 @@
                                 $data['SecurityFacilities'] = implode(',', $arr); // 公寓设施字符串
                             }
 
+
+                            // 插入不同的房型
                             if (isset($roomInfo['layout'])) {
                                 # code...
                                 foreach ($roomInfo['layout'] as $k => $layout) {
@@ -240,41 +153,32 @@
 
                                     // 插入已经采集过的URL
                                     $mysql->insert('house_gather', ['GatherUrl' => $roomUrl, 'SchoolID' => $schoolInfo['SchoolID'], 'ApartmentID' => $roomId]);
-                                    echo "Save...SchoolID:{$schoolInfo['SchoolID']} Page:{$page} Index:{$index}\r\n";
+                                    echo "Save...SchoolID:{$schoolInfo['SchoolID']} Page:{$page} Index:{$index}<br/>";
 
                                 }
                             }
 
-
                         }
 
-                        // 记录已读取列表序号
-                        // $breakpoint['listIndex'] = $listIndex;
-                        // file_put_contents('breakpoint.txt', json_encode($breakpoint));
-
-                        //die();
-                        //
-                        //
                     }else{
-                        echo "$schoolIndex---{$GatherInfo['GatherID']}---{$GatherInfo['SchollID']}---{$GatherInfo['ApartmentID']}---$roomUrl\r\n";
+                        // 已采集过
+                        echo "SchoolID:{$schoolInfo['SchoolID']} Page:{$page} Index:{$index} GatherID:{$GatherInfo['GatherID']}<br/>";
                     }
 
                 }
-
-                // 记录已读取页数序号
-                // $breakpoint['listIndex'] = -1;
-                // $breakpoint['pageIndex'] = $pageIndex;
-                // file_put_contents('breakpoint.txt', json_encode($breakpoint));
-
             }
 
-            // 记录已读取城市序号
-            // $breakpoint['pageIndex']   = -1;
-            // $breakpoint['schoolIndex'] = $schoolIndex;
-            // file_put_contents('breakpoint.txt', json_encode($breakpoint));
-
+            // 前5页采集完更新学校列表状态
+            $sql = 'UPDATE house_school SET Status = 1 WHERE SchoolID = ' . $schoolInfo['SchoolID'];
+            $mysql->query($sql);
+            return true;
+        }else{
+            // 学校列表全部采集完成，Status直0等待下次采集
+            $sql = 'UPDATE house_school SET Status = 0';
+            $mysql->query($sql);
+            echo "All the school list collection ";
+            return false;
         }
 
-        echo "end";
 
     }
