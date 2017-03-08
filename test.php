@@ -1,17 +1,11 @@
 <?php
-	$i = 1;
-	while ($a = 10 - $i) {
+	
+	$a = '123';
+	function fun($value='')
+	{
 		# code...
-		$i++;
 		echo $a;
-	}
-
-
-	$arr = [];
-	if (empty($arr)) {
-		# code...
 		echo "string";
 	}
 
-
-	echo "string";
+	fun();
