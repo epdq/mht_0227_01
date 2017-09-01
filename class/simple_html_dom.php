@@ -62,19 +62,42 @@ define('HDOM_INFO_ENDSPACE',7);
 define('DEFAULT_TARGET_CHARSET', 'UTF-8');
 define('DEFAULT_BR_TEXT', "\r\n");
 define('DEFAULT_SPAN_TEXT', " ");
-define('MAX_FILE_SIZE', 600000);
+define('MAX_FILE_SIZE', 1000000);
 // helper functions
 // -----------------------------------------------------------------------------
 // get html dom from file
 // $maxlen is defined in the code as PHP_STREAM_COPY_ALL which is defined as -1.
-function file_get_html($url, $use_include_path = false, $context=null, $offset = -1, $maxLen=-1, $lowercase = true, $forceTagsClosed=true, $target_charset = DEFAULT_TARGET_CHARSET, $stripRN=true, $defaultBRText=DEFAULT_BR_TEXT, $defaultSpanText=DEFAULT_SPAN_TEXT)
+function file_get_html($url, $data = false, $use_include_path = false, $context=null, $offset = -1, $maxLen=-1, $lowercase = true, $forceTagsClosed=true, $target_charset = DEFAULT_TARGET_CHARSET, $stripRN=true, $defaultBRText=DEFAULT_BR_TEXT, $defaultSpanText=DEFAULT_SPAN_TEXT)
 {
     // We DO force the tags to be terminated.
     $dom = new simple_html_dom(null, $lowercase, $forceTagsClosed, $target_charset, $stripRN, $defaultBRText, $defaultSpanText);
     // For sourceforge users: uncomment the next line and comment the retreive_url_contents line 2 lines down if it is not already done.
-    $contents = file_get_contents($url, $use_include_path, $context, $offset);
+    //$contents = file_get_contents($url, $use_include_path, $context, $offset);
     // Paperg - use our own mechanism for getting the contents as we want to control the timeout.
     //$contents = retrieve_url_contents($url);
+    
+    $queryServer = curl_init();
+    $ip = rand(1,222).'.'.rand(1,222).'.'.rand(1,222).'.'.rand(1,222);
+    curl_setopt($queryServer, CURLOPT_HTTPHEADER, array(
+        'X-FORWARDED-FOR:' . $ip,
+        'CLIENT-IP:' . $ip
+    )); // 构造IP
+    curl_setopt($queryServer, CURLOPT_REFERER, $url);
+    curl_setopt($queryServer, CURLOPT_URL, $url);
+    curl_setopt($queryServer, CURLOPT_HEADER, 0);
+    curl_setopt($queryServer, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($queryServer, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($queryServer, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.80 Safari/537.36");
+    curl_setopt($queryServer, CURLOPT_CONNECTTIMEOUT, 10);
+    curl_setopt($queryServer, CURLOPT_TIMEOUT, 30);
+    if ($data) {
+        curl_setopt($queryServer, CURLOPT_POST, true);
+        curl_setopt($queryServer, CURLOPT_POSTFIELDS, $data);
+    }
+    $contents = curl_exec($queryServer);
+    
+
+
     if (empty($contents) || strlen($contents) > MAX_FILE_SIZE)
     {
         return false;
@@ -354,8 +377,9 @@ class simple_html_dom_node
         if (isset($this->_[HDOM_INFO_TEXT])) return $this->dom->restore_noise($this->_[HDOM_INFO_TEXT]);
 
         $ret = '';
-        foreach ($this->nodes as $n)
+        foreach ($this->nodes as $n){
             $ret .= $n->outertext();
+        }
         return $ret;
     }
 
@@ -412,7 +436,6 @@ class simple_html_dom_node
                 }
             }
         }
-
         // render end tag
         if (isset($this->_[HDOM_INFO_END]) && $this->_[HDOM_INFO_END]!=0)
             $ret .= '</'.$this->tag.'>';

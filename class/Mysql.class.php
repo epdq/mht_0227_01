@@ -101,6 +101,23 @@
 	        return $this->query($sql);
 		}
 		
+		function update($table, $datas, $where = '1')
+		{
+			$value   =  array();
+            foreach ($datas as $key=>$val){
+                $val =  $this->parseValue($val);
+                if(is_scalar($val)) { // 过滤非标量数据
+                    $value[]   =  $key . ' = ' . $val;
+                }
+            }
+            $sql = 'UPDATE ' . $table . ' SET ' . implode(',', $value) . ' WHERE ' . $where;
+            if($this->query($sql)){
+            	return $this->affected_rows();
+            }else{
+            	return -1;
+            }
+		}
+
 		/*返回结果集*/
 		function fetch_array(){
 			return mysql_fetch_array($this -> result);

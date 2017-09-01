@@ -60,45 +60,53 @@
 			// $crawler = new Crawler($this->url);
 			// $html = $crawler->getHtml();
 			$dom = file_get_html($this->url);	// 获取dom对象
+			if ($dom) {
+				
+				$schoolDom = $dom->find('.browse__universities a');	// 获取城市a标签dom对象集合
 
-			$schoolDom = $dom->find('.browse__universities a');	// 获取城市a标签dom对象集合
-
-			if ($schoolDom != null) {
-				foreach ($schoolDom as $a) {
-					$schoolName = explode('<br>', $a->innertext);
-					$school['SchoolCnName'] = trim($schoolName[0]);
-					$school['URL'] = $this->base_url . $a->href;
-					$pattern = '#/u/(.*?)$#';
-					if(preg_match($pattern, $a->href, $arrSchoolName)){
-						$school['SchoolEngName'] = ucwords(str_replace('-', ' ', $arrSchoolName[1]));	// 城市英文名
-						//$school['FirstLetter'] = substr($school['SchoolEngName'], 0, 1);	// 学校首字母
+				if ($schoolDom != null) {
+					foreach ($schoolDom as $a) {
+						$schoolName = explode('<br>', $a->innertext);
+						$school['SchoolCnName'] = trim($schoolName[0]);
+						$school['URL'] = $this->base_url . $a->href;
+						$pattern = '#/u/(.*?)$#';
+						if(preg_match($pattern, $a->href, $arrSchoolName)){
+							$school['SchoolEngName'] = ucwords(str_replace('-', ' ', $arrSchoolName[1]));	// 城市英文名
+							//$school['FirstLetter'] = substr($school['SchoolEngName'], 0, 1);	// 学校首字母
+						}
+						$schoolList[] = $school;
 					}
-					
-					$schoolList[] = $school;
 				}
+
+				$dom->clear(); 
+				unset($schoolDom);
+
 			}
 
-			$dom->clear(); 
-			unset($schoolDom);
 			unset($dom);
 
 			return $schoolList;
 		}
 
-		// 获取学校所属城市信息
-		public function getSchoolArea($schoolURL='')
+		// 获取学校信息信息
+		public function getSchoolInfo($schoolURL='')
 		{
 			$dom = file_get_html($schoolURL);	// 获取dom对象
 			if ($dom) {
 				# code...
 				$cityDom = $dom->find('.breadcrumb__text', 1);	// 获取城市span标签对象
 				if ($cityDom != null) {
-					$city['AreaCnName'] = str_replace(' / ', '', $cityDom->innertext);
+					$schoolInfo['AreaCnName'] = str_replace(' / ', '', $cityDom->innertext);
 				}
 				$aDom = $dom->find('.breadcrumb__container a', 0);	
 				if ($aDom != null) {
-					$city['AreaEngName'] = ucwords(str_replace(['/us/', '-'], ['', ' '],  $aDom->href));
-					$city['FirstLetter'] = substr($city['AreaEngName'], 0, '1');
+					$schoolInfo['AreaEngName'] = ucwords(str_replace(['/us/', '-'], ['', ' '],  $aDom->href));
+					$schoolInfo['FirstLetter'] = substr($schoolInfo['AreaEngName'], 0, '1');
+				}
+				$pDom = $dom->find('.brief-introduction__count', 0);
+				if ($pDom) {
+					# code...
+					$schoolInfo['ApartmentNum'] = intval($pDom->plaintext);
 				}
 				if (isset($dom)) {
 					$dom->clear();
@@ -106,7 +114,7 @@
 			}
 
 			unset($dom);
-			return $city;
+			return $schoolInfo;
 		}
 
 		// 获取城市所在的公寓分页数量
@@ -272,7 +280,7 @@
 	 // die();
 
 	// 学校所在城市
-	// $area = $crawler->getSchoolArea('https://cn.student.com/us/tempe/u/itt-technical-institute-tempe-campus');
+	// $area = $crawler->getSchoolInfo('https://cn.student.com/us/tempe/u/itt-technical-institute-tempe-campus');
 	// var_dump($area);
 	// die();
 

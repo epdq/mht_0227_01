@@ -39,9 +39,9 @@
         $arr         = $mysql->getAll('SELECT FacilitiesID, FacilitiesName FROM house_facilities');
         $arrFacility = array_column($arr, 'FacilitiesName', 'FacilitiesID');
 
-        $arrContainFacility = []; // 房租包含数组
-        $arr                = $mysql->getAll('SELECT ContainID, ContainName FROM house_contain');
-        $arrContainFacility = array_column($arr, 'ContainName', 'ContainID');
+        // $arrContainFacility = []; // 房租包含数组
+        // $arr                = $mysql->getAll('SELECT ContainID, ContainName FROM house_contain');
+        // $arrContainFacility = array_column($arr, 'ContainName', 'ContainID');
 
         $arrSecurityFacility = []; // 安全保障数组
         $arr                 = $mysql->getAll('SELECT SecurityFacilitiesID, SecurityFacilitiesName FROM house_security_facilities');
@@ -106,10 +106,10 @@
                                 $data['ContainStr'] = implode(',', $roomInfo['ContainFacilities']); // 公寓设备
                                 $arr                = [];
                                 foreach ($roomInfo['ContainFacilities'] as $key => $facility) {
-                                    $facilityId = array_search($facility, $arrContainFacility);
+                                    $facilityId = array_search($facility, $arrFacility);
                                     if ($facilityId == false) {
-                                        $facilityId                      = $mysql->insert('house_contain', array('ContainName' => $facility));
-                                        $arrContainFacility[$facilityId] = $facility;
+                                        $facilityId                      = $mysql->insert('house_facilities', array('FacilitiesName' => $facility));
+                                        $arrFacility[$facilityId] = $facility;
                                     }
                                     $arr[] = $facilityId;
                                 }
