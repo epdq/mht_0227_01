@@ -1,6 +1,4 @@
 <?php 
 
-$Intention['A'] = 100;
-$Intention['B'] = 200;
-$Intention[] = 300;
-dd($Intention);
+$a = $_GET['a'];
+var_dump($a);
